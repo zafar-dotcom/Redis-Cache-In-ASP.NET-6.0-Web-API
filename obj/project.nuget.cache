@@ -1,10 +1,11 @@
 {
   "version": 2,
-  "dgSpecHash": "t9mHrhAfqxj0shMS3VGQSUy1XYW3ErxQ37gmuLZ7FxKVhf6lSuz2eWzr4QbpaY/DVr93kKnhUIBQ9IGa3wtd3Q==",
+  "dgSpecHash": "t7pTGZIJYgcgZHQJQ3FDdzslL2ECiTmq6+PpyZwb6zxgcrYhh+4+c2qL2NZNtRnslniw9SNI6K51Db58cN/MmQ==",
   "success": true,
   "projectFilePath": "C:\\Users\\WAQAR COMPUTER\\source\\repos\\SendEmailViaSMTP\\SendEmailViaSMTP.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\WAQAR COMPUTER\\.nuget\\packages\\google.protobuf\\3.21.9\\google.protobuf.3.21.9.nupkg.sha512",
+    "C:\\Users\\WAQAR COMPUTER\\.nuget\\packages\\htmlagilitypack\\1.11.46\\htmlagilitypack.1.11.46.nupkg.sha512",
     "C:\\Users\\WAQAR COMPUTER\\.nuget\\packages\\k4os.compression.lz4\\1.2.6\\k4os.compression.lz4.1.2.6.nupkg.sha512",
     "C:\\Users\\WAQAR COMPUTER\\.nuget\\packages\\k4os.compression.lz4.streams\\1.2.6\\k4os.compression.lz4.streams.1.2.6.nupkg.sha512",
     "C:\\Users\\WAQAR COMPUTER\\.nuget\\packages\\k4os.hash.xxhash\\1.0.6\\k4os.hash.xxhash.1.0.6.nupkg.sha512",

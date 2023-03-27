@@ -275,7 +275,7 @@ namespace SendEmailViaSMTP.DAL_Services
                         {
                             cmd2.Parameters.AddWithValue("@id", id);
                             cmd2.ExecuteNonQuery();
-
+                            conn.Close();
                         }
 
                     }
@@ -288,13 +288,65 @@ namespace SendEmailViaSMTP.DAL_Services
                     throw;
                     return false;
                 }
+                
 
             }
         }
         // -----------------Transactopn Control End -----------------------------
-        
-        
-        
+
+
+
+        // -----------------Redis cache Start -----------------------------
+
+        public  List<ArticleMatrix> ListOfMatrix(string authorid)
+        {
+            try
+            {
+                using (MySqlConnection conn = new MySqlConnection(str))
+                {
+                    conn.Open();
+                    string query = "select * from ArticleMatrices where AuthorId =@AuthorId ORDER By PubDate DESC;";
+                    using (MySqlCommand cmd = new MySqlCommand(query, conn))
+                    {
+                        cmd.Parameters.AddWithValue("@AuthorId", authorid);
+
+                        MySqlDataReader dr = cmd.ExecuteReader();
+                 
+                        DataTable tbl = new DataTable();
+                        tbl.Load(dr);
+                        List<ArticleMatrix> lst = new List<ArticleMatrix>();
+                        conn.Close();
+                        foreach (DataRow row in tbl.Rows)
+                        {
+                            ArticleMatrix obj = new ArticleMatrix
+                            {
+                                Id = (int)row["Id"],
+                                AuthorId = (string)row["AuthorId"],
+                                Author = (string)row["Author"],
+                                Link = (string)row["Link"],
+                                Title = (string)row["Title"],
+                                Type = (string)row["Type"],
+                                Category = (string)row["Category"],
+                                Views = (string)row["Views"],
+                                ViewsCount = (decimal)row["ViewsCount"],
+                                Likes = (int)row["Likes"],
+                                PubDate = (DateTime)row["PubDate"]
+
+                            };
+                            lst.Add(obj);
+                        }
+                        return lst;
+                    }
+                }
+            }
+            catch (Exception)
+            {
+
+                throw;
+            }
+        }
+
+
         public List<UserModel> GetEmployee()
         {
             List<UserModel> lst = new List<UserModel>();

@@ -4,8 +4,12 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Distributed;
 using MySql.Data.MySqlClient;
 using Mysqlx.Crud;
+using System.Text.Json;
+using SendEmailViaSMTP.DAL_Services;
 using SendEmailViaSMTP.Models;
 using System.Globalization;
+using System.Reflection.PortableExecutable;
+using System.Text;
 using System.Xml.Linq;
 
 namespace SendEmailViaSMTP.Controllers
@@ -18,10 +22,15 @@ namespace SendEmailViaSMTP.Controllers
         private readonly IConfiguration _configuration;
         private static readonly object _lockObj = new();
         private readonly IDistributedCache _cache;
+        private readonly DAL _dal;
+        private readonly string str = "server=localhost;port=3306;uid=root;pwd=sobiazafar@2023;database=mvc_crud";
+
+
         public AnalyticsControllerController(IConfiguration configuration, IDistributedCache cache)
         {
             _configuration = configuration;
             _cache = cache;
+            _dal = new DAL();
         }
         [HttpPost]
         [Route("createpost/{authorid}")]
@@ -138,8 +147,9 @@ namespace SendEmailViaSMTP.Controllers
                     }
 
                 });
-                using(MySqlConnection conn=new MySqlConnection())
+                using(MySqlConnection conn=new MySqlConnection(str))
                 {
+
                    await conn.OpenAsync();
                     using (MySqlCommand cmd = new MySqlCommand("DELETE FROM ArticleMatrices WHERE AuthorId = @AuthorId",conn))
                     {
@@ -154,7 +164,7 @@ namespace SendEmailViaSMTP.Controllers
                         {
                             if(articlmtrx.Category== "Videos")
                             {
-                                articlmtrx.Type = "articlmtrx";
+                                articlmtrx.Type = "Video";
                             }
                             articlmtrx.Category = articlmtrx.Category.Replace("&amp;", "&");
                             cmd2.Parameters.Clear();
@@ -174,8 +184,61 @@ namespace SendEmailViaSMTP.Controllers
                         }
                     }
                 }
+                await _cache.RemoveAsync(authorid);
+                return true;
+            }
+            catch
+            {
+                return false;
+            }           
+        }
 
-            }                 
+        [HttpGet]
+        [Route("getall/{authorid}/{enablecache}")]
+        public async Task<List<ArticleMatrix>> GetAllMatrix(string authorid,bool enablecache)
+        {
+            if (!enablecache)
+            {
+                var lst = _dal.ListOfMatrix(authorid);
+                return lst;
+            }
+            string cachekey = authorid;
+
+            //trying to get data from cache key first if awailable
+            // Trying to get data from the Redis cache
+            byte[] cachedData = await _cache.GetAsync(cachekey);
+            List<ArticleMatrix> articleMatrices = new();
+            if (cachedData != null)
+            {
+                // If the data is found in the cache, encode and deserialize cached data.
+               // var cachedDataString = Encoding.UTF8.GetString(cachedData);
+                var cachedDataSting = Encoding.UTF8.GetString(cachedData);
+                articleMatrices = System.Text.Json.JsonSerializer.Deserialize<List<ArticleMatrix>>(cachedDataSting);
+                    //var serilizaer = new JsonSerializer();
+                    //articleMatrices = serilizaer.Deserialize<List<ArticleMatrix>>(jsonreaer);
+                
+              }
+            else
+            {
+                // If the data is not found in the cache, then fetch data from database
+
+               articleMatrices = _dal.ListOfMatrix(authorid);
+                //serilize the data into cache
+                string cachedDataString = JsonSerializer.Serialize(articleMatrices);
+
+                var dataTocahce = Encoding.UTF8.GetBytes(cachedDataString);
+
+                // Setting up the cache options
+
+                DistributedCacheEntryOptions option = new DistributedCacheEntryOptions()
+                     .SetAbsoluteExpiration(DateTime.Now.AddMinutes(5))
+                     .SetSlidingExpiration(TimeSpan.FromMinutes(3));
+
+                // Add the data into the cache
+
+                await _cache.SetAsync(cachekey, dataTocahce,option);
+            }
+            return articleMatrices;
         }
     }
 }

@@ -8,12 +8,8 @@ using System.Transactions;
 namespace SendEmailViaSMTP.DAL_Services
 {
     public class DAL
-    { private readonly string _connection;
-        
-        //public DAL(IConfiguration configuration)
-        //{
-        //    _connection = configuration.GetConnectionString("Constr");
-        //}
+    {
+       
 
         private readonly string str = "server=localhost;port=3306;uid=root;pwd=sobiazafar@2023;database=mvc_crud";
        

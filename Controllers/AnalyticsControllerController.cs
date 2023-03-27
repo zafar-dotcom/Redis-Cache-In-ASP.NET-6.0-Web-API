@@ -20,6 +20,7 @@ namespace SendEmailViaSMTP.Controllers
     {
         readonly CultureInfo culture = new("en-US");
         private readonly IConfiguration _configuration;
+
         private static readonly object _lockObj = new();
         private readonly IDistributedCache _cache;
         private readonly DAL _dal;
@@ -28,6 +29,7 @@ namespace SendEmailViaSMTP.Controllers
 
         public AnalyticsControllerController(IConfiguration configuration, IDistributedCache cache)
         {
+           
             _configuration = configuration;
             _cache = cache;
             _dal = new DAL();
@@ -147,7 +149,8 @@ namespace SendEmailViaSMTP.Controllers
                     }
 
                 });
-                using(MySqlConnection conn=new MySqlConnection(str))
+                string connectionString = _configuration.GetConnectionString("Constr");
+                using (MySqlConnection conn=new MySqlConnection(str))
                 {
 
                    await conn.OpenAsync();
